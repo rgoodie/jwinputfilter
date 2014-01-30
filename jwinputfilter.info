@@ -1,0 +1,4 @@
+name = SoC's JW Player Inputer Filter
+description = Provides a filter translation for JWplayer javascript / DIV
+
+core = 7.x
