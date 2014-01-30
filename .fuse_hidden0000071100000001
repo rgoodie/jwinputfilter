@@ -1,44 +1,4 @@
-<?php 
 
-define("JWCODESNIPPET", "
-	<script language='text/javascript'>
-		jwplayer.key='';
-	</script>
-	<div id='video'>Loading player</div>
-	<script type='text/javascript'>
-		jwplayer('video').setup({
-			file: 'VIDEOFILE',
-			image: 'IMAGEFILE',
-			width: WIDTH,
-			height: HEIGHT
-		});
-</script>
-");
-
-
-
-
-
-function jwinputfilter_filter_info() {
-	$filters['filter_html'] = array(
-		'title' => t('JWPlayer embed code'),
-		'description' => t('Replaces [JW:Video.mp4|Picture.jpg] with the javascript/HTML to produce a JW player'),
-		'process callback' => 'jwinputfilter_filterprocess',
-		'tips callback' => 'jwinputfilter_filter_tips',
-		'cache' => FALSE,
-		);
-	return $filters;
-}
-
-
-function jwinputfilter_filter_tips($filter, $format, $long) {
-  if ($long) {
-    return t('Produces JW player...' );
-  }
-  else {
-    return t('Produces JW player...' );
-  }
-}
 
 
 function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache, $cache_id) {
