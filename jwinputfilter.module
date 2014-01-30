@@ -71,7 +71,7 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 			$produce_code = trim($jwkey_code) . trim($produce_code);
 		}
 
-		dsm($produce_code);
+		// dsm($produce_code);
 
 
 		$text = str_replace($fullmatch, $produce_code, $text);
