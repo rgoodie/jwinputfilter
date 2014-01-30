@@ -73,6 +73,19 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 
 		// dsm($produce_code);
 
+		// include JS player
+		if (isset($filter->settings['soc_jwplayer_playerurl']) && (!is_null($filter->settings['soc_jwplayer_playerurl']))) {
+			$server_filename = $GLOBALS['_SERVER']['DOCUMENT_ROOT'] . '/' . $filter->settings['soc_jwplayer_playerurl'];
+			$intrnt_pathname = $GLOBALS['_SERVER']['SERVER_NAME']  . '/' . $filter->settings['soc_jwplayer_playerurl'];
+			if (file_exists($server_filename)) {
+				drupal_add_js('//' . $intrnt_pathname);
+			} else {
+				$msg = t("Tried to include //$intrnt_pathname but the file $server_filename does not exist. Please check your path");
+				drupal_set_message($msg, 'error');
+				error_log($msg);
+			}
+		}
+
 
 		$text = str_replace($fullmatch, $produce_code, $text);
 
