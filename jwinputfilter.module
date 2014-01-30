@@ -117,7 +117,16 @@ function _jwinputfilter_settings($form, &$form_state, $filter, $format, $default
 		'#title' => t('JWPlayer URL'),
 		'#default_value' => $filter->settings['soc_jwplayer_playerurl'],
 		'#maxlength' => 1024,
-		'#description' => t('What is the path of the player? For example, something akin to <pre>/sites/default/files/page_specific_js/jwplayer/jwplayer.j</pre> '),
+		'#description' => t('What is the path of the player? For example, something akin to <code>/sites/default/files/page_specific_js/jwplayer/jwplayer.j</code> Do not use starting or ending slashes.'),
 		);
+
+	$settings['soc_jwplayer_default_thumb_url'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Default Logo or Thumbnail'),
+		'#default_value' => $filter->settings['soc_jwplayer_default_thumb_url'],
+		'#maxlength' => 1024,
+		'#description' => t('If no thumbnail is given, use this image. For example, something akin to "<code>sites/default/files/images/Logo.png</code>"  or a full URL such as "<code>https://server.com/images/logo.png</code>". <b>It is okay</b> to use starting or ending slashes. '),
+		);
+
 	return $settings;
 }
