@@ -1,7 +1,7 @@
 jwinputfilter
 =============
 
-A small Drupal 7 input filter that aids in embedding a video and thunbnail inside the WYSIWYG editor
+A small Drupal 7 input filter that aids in embedding a video into the JWPlayer and thunbnail inside the WYSIWYG editor
 
 Usage
 =====
