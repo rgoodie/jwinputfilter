@@ -89,7 +89,7 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 function _jwinputfilter_settings($form, &$form_state, $filter, $format, $defaults) {
 	$filter->settings += $defaults;
 
-	dsm($GLOBALS);
+	// dsm($GLOBALS);
 
 	$settings['soc_jwplayer_key_displayed'] = array(
 		'#type' => 'textfield',
