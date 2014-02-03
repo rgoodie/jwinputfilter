@@ -26,7 +26,7 @@ define("SOCJWCODESNIPPET", "
 function jwinputfilter_filter_info() {
 	$filters['filter_html'] = array(
 		'title' => t('JWPlayer embed code'),
-		'description' => t('Replaces [JW:Video.mp4|Picture.jpg] with the javascript/HTML to produce a JW player'),
+		'description' => t('Replaces [JW:Video.mp4|Picture.jpg|WidthxHeight] with the javascript/HTML to produce a JW player'),
 		'process callback' => 'jwinputfilter_filterprocess',
 		'tips callback' => 'jwinputfilter_filter_tips',
 		'settings callback' =>'_jwinputfilter_settings',
@@ -48,20 +48,40 @@ function jwinputfilter_filter_tips($filter, $format, $long) {
 
 function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache, $cache_id) {
 
-	preg_match('/\[JW:(.*)\|(.*)\]/', $text, $matches);
+	preg_match("/\[JW:(.*)\|(.*)\|(.*)\]/", $text, $matches);
+
 
 	// Check to see if array items exists. The first two will of course be
 	// the video name and thumbnail image. 
 	if (isset($matches[1]) && isset($matches[2])) {
 
-		$fullmatch = trim($matches[0]);
-		$videoname = trim($matches[1]);
-		$thumbname = trim($matches[2]);
+		// if no thumbnail, use default 
+		if ($matches[2] == '') {
+			if ( isset($filter->settings['soc_jwplayer_default_thumb_url'])) {
+				$matches[2] = $filter->settings['soc_jwplayer_default_thumb_url'];
+			}
+		}
+
+		$fullmatch 		= trim($matches[0]);
+		$videoname 		= trim($matches[1]);
+		$thumbname 		= trim($matches[2]);
+		$widthdefault 	= "500";
+		$heightdefault  = "330";
+
+
+
+		// grab width and height if we got it
+		if (isset($matches[3])) { 
+			preg_match("/(\d+)x(\d+)/", $text, $dim_matches);
+			$widthdefault = $dim_matches[1];
+			$heightdefault = $dim_matches[2];
+		}
+		
 
 		// being replacing template with actual values
 		$produce_code = SOCJWCODESNIPPET; 
-		$produce_code = str_replace("WIDTH", "600", $produce_code);
-		$produce_code = str_replace("HEIGHT", "400", $produce_code);
+		$produce_code = str_replace("WIDTH", $widthdefault, $produce_code);
+		$produce_code = str_replace("HEIGHT", $heightdefault, $produce_code);
 		$produce_code = str_replace("VIDEOFILE", $videoname, $produce_code);
 		$produce_code = str_replace("IMAGEFILE", $thumbname, $produce_code);
 
@@ -77,8 +97,11 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 		if (isset($filter->settings['soc_jwplayer_playerurl']) && (!is_null($filter->settings['soc_jwplayer_playerurl']))) {
 			$server_filename = $GLOBALS['_SERVER']['DOCUMENT_ROOT'] . '/' . $filter->settings['soc_jwplayer_playerurl'];
 			$intrnt_pathname = $GLOBALS['_SERVER']['SERVER_NAME']  . '/' . $filter->settings['soc_jwplayer_playerurl'];
+			$intrnt_html5path = $GLOBALS['_SERVER']['SERVER_NAME']  . '/' . $filter->settings['soc_jwplayer_playerurl_html5'];
+
 			if (file_exists($server_filename)) {
-				drupal_add_js('//' . $intrnt_pathname);
+				drupal_add_js('https://' . $intrnt_pathname, array('type' => 'file', 'media' => 'all', 'preprocess' => true, 'every_page' => true));
+				drupal_add_js('https://' . $intrnt_html5path, array('type' => 'file', 'media' => 'all', 'preprocess' => true, 'every_page' => true));
 			} else {
 				$msg = t("Tried to include //$intrnt_pathname but the file $server_filename does not exist. Please check your path");
 				drupal_set_message($msg, 'error');
@@ -120,6 +143,14 @@ function _jwinputfilter_settings($form, &$form_state, $filter, $format, $default
 		'#description' => t('What is the path of the player? For example, something akin to <code>/sites/default/files/page_specific_js/jwplayer/jwplayer.j</code> Do not use starting or ending slashes.'),
 		);
 
+	$settings['soc_jwplayer_playerurl_html5'] = array(
+		'#type' => 'textfield',
+		'#title' => t('JWPlayer HTML5 URL'),
+		'#default_value' => $filter->settings['soc_jwplayer_playerurl_html5'],
+		'#maxlength' => 1024,
+		'#description' => t('What is the path of the player? For example, something akin to <code>/sites/default/files/page_specific_js/jwplayer/jwplayer.html5.js</code> Do not use starting or ending slashes.'),
+		);
+
 	$settings['soc_jwplayer_default_thumb_url'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Default Logo or Thumbnail'),
@@ -127,6 +158,13 @@ function _jwinputfilter_settings($form, &$form_state, $filter, $format, $default
 		'#maxlength' => 1024,
 		'#description' => t('If no thumbnail is given, use this image. For example, something akin to "<code>sites/default/files/images/Logo.png</code>"  or a full URL such as "<code>https://server.com/images/logo.png</code>". <b>It is okay</b> to use starting or ending slashes. '),
 		);
+
+	$settings['soc_jwplayer_show_debug'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Show debug output on page'),
+		'#default_value' => $filter->settings['soc_jwplayer_show_debug'],
+		);
+
 
 	return $settings;
 }
