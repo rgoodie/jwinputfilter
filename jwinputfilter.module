@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 
 define("SOCJWPLAYERCODEKEY","<script type='text/javascript'>jwplayer.key='JWKEY';</script>");
@@ -21,7 +21,7 @@ define("SOCJWCODESNIPPET", "
 
 
 function jwinputfilter_filter_info() {
-	
+
 	$filters['filter_soc_jwplayer'] = array(
 		'title' => t('JWPlayer embed code'),
 		'description' => t('Replaces [JW:Video.mp4|Picture.jpg|WidthxHeight] with the javascript/HTML to produce a JW player'),
@@ -36,10 +36,10 @@ function jwinputfilter_filter_info() {
 
 function jwinputfilter_filter_tips($filter, $format, $long) {
 	if ($long) {
-		return t('Produces JW player...' );
+		return t('Allows mark up as [JW:Video.mp4|Picture.jpg|WidthxHeight]' );
 	}
 	else {
-		return t('Produces JW player...' );
+		return t('Allows mark up as [JW:Video.mp4|Picture.jpg|WidthxHeight]' );
 	}
 }
 
@@ -55,10 +55,10 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 	for($i = 0; $i < count($matches); ++$i) {
 
 		// Check to see if array items exists. The first two will of course be
-		// the video name and thumbnail image. 
+		// the video name and thumbnail image.
 		if (isset($matches[1][$i]) && isset($matches[2][$i])) {
 
-			// if no thumbnail, use default 
+			// if no thumbnail, use default
 			if ($matches[2][$i] == '') {
 				if ( isset($filter->settings['soc_jwplayer_default_thumb_url'])) {
 					$matches[$i][2] = $filter->settings['soc_jwplayer_default_thumb_url'];
@@ -75,22 +75,22 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 
 
 			// grab width and height if we got it
-			if (isset($matches[3][$i])) { 
+			if (isset($matches[3][$i])) {
 				preg_match("/(\d+)x(\d+)/", $text, $dim_matches);
 				$widthdefault = $dim_matches[1];
 				$heightdefault = $dim_matches[2];
 			}
-			
+
 
 			// being replacing template with actual values
-			$produce_code = SOCJWCODESNIPPET; 
+			$produce_code = SOCJWCODESNIPPET;
 			$produce_code = str_replace("WIDTH", $widthdefault, $produce_code);
 			$produce_code = str_replace("HEIGHT", $heightdefault, $produce_code);
 			$produce_code = str_replace("VIDEOFILE", $videoname, $produce_code);
 			$produce_code = str_replace("IMAGEFILE", $thumbname, $produce_code);
 			$produce_code = str_replace("DIVID", $div_ID, $produce_code);
 
-			// If key is set, use it and append it to the whole thing for output. 
+			// If key is set, use it and append it to the whole thing for output.
 			if (isset($filter->settings['soc_jwplayer_key_displayed'])) {
 				$jwkey_code = str_replace("JWKEY", trim($filter->settings['soc_jwplayer_key_displayed']), SOCJWPLAYERCODEKEY);
 				$produce_code =  trim($jwkey_code) . trim($produce_code);
@@ -114,7 +114,7 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 				}
 			}
 
-		
+
 
 			$text = str_replace($fullmatch, $produce_code, $text);
 
@@ -128,8 +128,8 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 }
 
 /**
- * The settings function. The only option to currently set is the JW key. 
- * 
+ * The settings function. The only option to currently set is the JW key.
+ *
  */
 function _jwinputfilter_settings($form, &$form_state, $filter, $format, $defaults) {
 	$filter->settings += $defaults;
