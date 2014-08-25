@@ -102,7 +102,7 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 				$intrnt_pathname 	= $GLOBALS['_SERVER']['SERVER_NAME']  . '/' . $filter->settings['soc_jwplayer_playerurl'];
 
 				if (file_exists($server_filename)) {
-					drupal_add_js('https://' . $intrnt_pathname, array('type' => 'file', 'media' => 'all', 'preprocess' => false, 'every_page' => true));
+					drupal_add_js('//' . $intrnt_pathname, array('type' => 'file', 'media' => 'all', 'preprocess' => false, 'every_page' => true));
 			} else {
 					$msg = t("Tried to include //$intrnt_pathname but the file $server_filename does not exist. Please check your path");
 					drupal_set_message($msg, 'error');
