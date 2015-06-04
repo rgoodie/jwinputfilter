@@ -65,17 +65,25 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 				}
 			}
 
-			$div_ID 		= 'video_' . $i;
+            // Values and defaults
+			$div_ID 		= 'video_' . $i;                // DIV ID
 			$fullmatch 		= trim($matches[0][$i]);
-			$videoname 		= trim($matches[1][$i]);
-			$thumbname 		= trim($matches[2][$i]);
+			$videoname 		= trim($matches[1][$i]);        // video path name, relative
 			$widthdefault 	= "500";
 			$heightdefault  = "330";
 
 
+            // Thumbnail image exists? If not, use the specified default
+            if (isset ($$matches[2][$i])) {
+                $thumbname = trim($matches[2][$i]);
+            } else {
+                $thumbname = $filter->settings['soc_jwplayer_default_thumb_url'];
+            }
 
-			// grab width and height if we got it
-			if (isset($matches[3][$i])) {
+			// Grab width and height if we got it. Check to ensure that the
+            // array element exists and that it has some data there. If not
+            // we will depend on the default values set above.
+			if (isset($matches[3][$i]) && (trim($matches[3][$i]) != '')) {
 				preg_match("/(\d+)x(\d+)/", $text, $dim_matches);
 				$widthdefault = $dim_matches[1];
 				$heightdefault = $dim_matches[2];
