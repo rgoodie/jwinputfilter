@@ -102,7 +102,7 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
                     $produce_code = SOCJWCODESNIPPETversion2;
                     $produce_code = str_replace("WIDTH", $options['width'], $produce_code);
                     $produce_code = str_replace("RATIO", $options['ratio'], $produce_code);
-
+ 
 
 
                 }
