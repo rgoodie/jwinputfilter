@@ -11,6 +11,7 @@ configuring the input filter.  Inside your WYSIWYG do something like this in a n
 `[JW:/sites/default/files/videos/myvideo.mp4|/sites/default/files/images/MyThumbnail.jpg|500x300]`
 
 Or the newer syntax includes JSON in the 3rd field
+
 `[JW:/sites/default/files/videos/myvideo.mp4|/sites/default/files/images/MyThumbnail.jpg|{ "width":"100%", "ratio":"16:9"}]`
 
 Warranty, Gotchas and Assumptions
