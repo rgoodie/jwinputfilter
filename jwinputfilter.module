@@ -99,7 +99,6 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
                 if (strpos($matches[3][$i], '{') !== FALSE) {
 
                     $options = json_decode($matches[3][$i], true);
-                    dpm('% in width height field');
                     $produce_code = SOCJWCODESNIPPETversion2;
                     $produce_code = str_replace("WIDTH", $options['width'], $produce_code);
                     $produce_code = str_replace("RATIO", $options['ratio'], $produce_code);
