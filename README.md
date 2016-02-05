@@ -8,11 +8,20 @@ How
 Install the module and enable it. Be sure to give the input filter your JW key and path to the jwplayer.js file by
 configuring the input filter.  Inside your WYSIWYG do something like this in a node's body field.
 
-`[JW:/sites/default/files/videos/myvideo.mp4|/sites/default/files/images/MyThumbnail.jpg|500x300]`
 
-Or the newer syntax includes JSON in the 3rd field
+Preferred Style.
 
-`[JW:/sites/default/files/videos/myvideo.mp4|/sites/default/files/images/MyThumbnail.jpg|{ "width":"100%", "ratio":"16:9"}]`
+[JW:/sites/default/files/Intro.mp4|/sites/default/files/introvideostill.jpg|{"width":600,"height":338,"mediaid":"xxbbaa"}]
+
+
+Preferred with radio
+
+[JW:/sites/default/files/Intro.mp4|/sites/default/files/introvideostill.jpg|{"width":"98%","ratio":"16:9"}]
+
+
+Old style
+
+[JW:/sites/default/files/Intro.mp4|/sites/default/files/introvideostill.jpg|600x338]
 
 Warranty, Gotchas and Assumptions
 -----------------------
