@@ -16,9 +16,9 @@ define("SOCJWCODESNIPPET", "
 </script>");
 
 
-define("SOCJWCODESNIPPETversion2", "
+/*define("SOCJWCODESNIPPETversion2", "
     <div id='DIVID'>Loading player</div>
-    <p>TEST</p>
+
     <script type='text/javascript'>
         jwplayer('DIVID').setup({
             file: 'VIDEOFILE',
@@ -28,9 +28,13 @@ define("SOCJWCODESNIPPETversion2", "
             mediaid: 'MEDIAID'
 
         });
+</script>");*/
+
+define("SOCJWCODESNIPPETversion2", "
+    <div id='DIVID'>Loading player</div>
+    <script type='text/javascript'>
+        jwplayer('DIVID').setup(ARGS);
 </script>");
-
-
 
 
 function jwinputfilter_filter_info()
@@ -84,7 +88,7 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 
             $div_ID = 'video_' . $i;
             $fullmatch = trim($matches[0][$i]);
-            $videoname = trim($matches[1][$i]);
+            $video_url = trim($matches[1][$i]);
             $thumbname = trim($matches[2][$i]);
             $width_default = "500";
             $height_default = "330";
@@ -97,7 +101,9 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
             if (isset($matches[3][$i])) {
 
                 /*
-                 * JSON processing preferred
+                 * JSON processing preferred. This takes the first two arguments, rolls them into the
+                 * JSON object and then uses them to replace a single ARGS in the template string above. 
+                 * This is a much simplier method. 
                  */
 
                 if (strpos($matches[3][$i], '{') !== FALSE) {
@@ -105,13 +111,22 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 
                     $options = json_decode($matches[3][$i], true);
                     $produce_code = SOCJWCODESNIPPETversion2;
-                    $produce_code = str_replace("WIDTH", $options['width'], $produce_code);
-                    $produce_code = str_replace("HEIGHT", $options['height'], $produce_code);
-                    $produce_code = str_replace("RATIO", $options['ratio'], $produce_code);
-                    $produce_code = str_replace("MEDIAID", $options['mediaid'], $produce_code);
 
+                    // file
+                    $options['file']=$video_url;
 
-                } /*
+                    // image
+                    $options['image']=$thumbname;
+
+                    // correct ratio
+                    $options['aspectratio']=$options['ratio'];
+
+                    $produce_code = str_replace("ARGS", json_encode($options), $produce_code);
+
+                 
+                } 
+                
+                /*
                  * Segment the values specific to the older method. Match out height and width with a preg_match, use
                  * the original constant from above, and do string replace.
                  */
@@ -127,10 +142,13 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 
 
             /*
-             * Replace values used by both situations
+             * Video url and image file used in the older version
              */
-            $produce_code = str_replace("VIDEOFILE", $videoname, $produce_code);
+            $produce_code = str_replace("VIDEOFILE", $video_url, $produce_code);
             $produce_code = str_replace("IMAGEFILE", $thumbname, $produce_code);
+
+
+            // DIV ID
             $produce_code = str_replace("DIVID", $div_ID, $produce_code);
 
 
@@ -141,14 +159,12 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
             }
 
             // include REMOTE JS Player.
-       
+
             if (isset($filter->settings['soc_jwplayer_playerurl_external']) && (strlen($filter->settings['soc_jwplayer_playerurl_external']) > 5)) {
                 drupal_add_js($filter->settings['soc_jwplayer_playerurl_external'], 'external');
             } else {
                 drupal_add_js(DEFAULT_JWPLAYER_URL, 'external');
             }
-
-
 
 
             $text = str_replace($fullmatch, $produce_code, $text);
@@ -171,7 +187,7 @@ function _jwinputfilter_settings($form, &$form_state, $filter, $format, $default
     $filter->settings += $defaults;
 
     // default to 7.3 if nothing selected
-    if (is_null($filter->settings['soc_jwplayer_playerurl_external']) ) {
+    if (is_null($filter->settings['soc_jwplayer_playerurl_external'])) {
         $filter->settings['soc_jwplayer_playerurl_external'] = DEFAULT_JWPLAYER_URL;
     }
 
@@ -201,7 +217,6 @@ function _jwinputfilter_settings($form, &$form_state, $filter, $format, $default
         '#maxlength' => 1024,
         '#description' => t('If no thumbnail is given, use this image. For example, something akin to "<code>sites/default/files/images/Logo.png</code>"  or a full URL such as "<code>https://server.com/images/logo.png</code>". <b>It is okay</b> to use starting or ending slashes. '),
     );
-
 
 
     return $settings;
