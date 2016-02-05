@@ -1,7 +1,8 @@
 <?php
 
 
-define("SOCJWPLAYERCODEKEY","<script type='text/javascript'>jwplayer.key='JWKEY';</script>");
+define('DEFAULT_JWPLAYER_URL', '//ssl.p.jwpcdn.com/player/v/7.3.0/jwplayer.js');
+define("SOCJWPLAYERCODEKEY", "<script type='text/javascript'>jwplayer.key='JWKEY';</script>");
 
 define("SOCJWCODESNIPPET", "
 	<div id='DIVID'>Loading player</div>
@@ -17,12 +18,14 @@ define("SOCJWCODESNIPPET", "
 
 define("SOCJWCODESNIPPETversion2", "
     <div id='DIVID'>Loading player</div>
+    <p>TEST</p>
     <script type='text/javascript'>
         jwplayer('DIVID').setup({
             file: 'VIDEOFILE',
             image: 'IMAGEFILE',
             width: 'WIDTH',
-            aspectratio: 'RATIO'
+            height: 'HEIGHT',
+            mediaid: 'MEDIAID'
 
         });
 </script>");
@@ -30,32 +33,33 @@ define("SOCJWCODESNIPPETversion2", "
 
 
 
-function jwinputfilter_filter_info() {
+function jwinputfilter_filter_info()
+{
 
     $filters['filter_soc_jwplayer'] = array(
         'title' => t('JWPlayer embed code'),
         'description' => t('Replaces [JW:Video.mp4|Picture.jpg|WidthxHeight] with the javascript/HTML to produce a JW player'),
         'process callback' => 'jwinputfilter_filterprocess',
         'tips callback' => 'jwinputfilter_filter_tips',
-        'settings callback' =>'_jwinputfilter_settings',
+        'settings callback' => '_jwinputfilter_settings',
         'cache' => FALSE,
     );
     return $filters;
 }
 
 
-function jwinputfilter_filter_tips($filter, $format, $long) {
+function jwinputfilter_filter_tips($filter, $format, $long)
+{
     if ($long) {
-        return t('Allows mark up as [JW:Video.mp4|Picture.jpg|WidthxHeight]' );
-    }
-    else {
-        return t('Allows mark up as [JW:Video.mp4|Picture.jpg|WidthxHeight]' );
+        return t('Allows mark up as [JW:Video.mp4|Picture.jpg|WidthxHeight]');
+    } else {
+        return t('Allows mark up as [JW:Video.mp4|Picture.jpg|WidthxHeight]');
     }
 }
 
 
-function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache, $cache_id) {
-
+function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache, $cache_id)
+{
 
 
     preg_match_all("/\[JW:(.*)\|(.*)\|(.*)\]/", $text, $matches);
@@ -63,8 +67,8 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
     /*
      * Get number of videos found and begin executing the loop over each one.
      */
-    $number_of_videos = count($matches[0]) ;
-    for($i = 0; $i < $number_of_videos; ++$i) {
+    $number_of_videos = count($matches[0]);
+    for ($i = 0; $i < $number_of_videos; ++$i) {
 
 
         // Check to see if array items exists. The first two will of course be
@@ -73,18 +77,17 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
 
             // if no thumbnail, use default
             if ($matches[2][$i] == '') {
-                if ( isset($filter->settings['soc_jwplayer_default_thumb_url'])) {
+                if (isset($filter->settings['soc_jwplayer_default_thumb_url'])) {
                     $matches[$i][2] = $filter->settings['soc_jwplayer_default_thumb_url'];
                 }
             }
 
-            $div_ID 		= 'video_' . $i;
-            $fullmatch 		= trim($matches[0][$i]);
-            $videoname 		= trim($matches[1][$i]);
-            $thumbname 		= trim($matches[2][$i]);
-            $width_default 	= "500";
-            $height_default  = "330";
-
+            $div_ID = 'video_' . $i;
+            $fullmatch = trim($matches[0][$i]);
+            $videoname = trim($matches[1][$i]);
+            $thumbname = trim($matches[2][$i]);
+            $width_default = "500";
+            $height_default = "330";
 
 
             /*
@@ -94,19 +97,21 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
             if (isset($matches[3][$i])) {
 
                 /*
-                 * If the width field contains a percentage, use it. This requires a slight change to the processing.
+                 * JSON processing preferred
                  */
+
                 if (strpos($matches[3][$i], '{') !== FALSE) {
+
 
                     $options = json_decode($matches[3][$i], true);
                     $produce_code = SOCJWCODESNIPPETversion2;
                     $produce_code = str_replace("WIDTH", $options['width'], $produce_code);
+                    $produce_code = str_replace("HEIGHT", $options['height'], $produce_code);
                     $produce_code = str_replace("RATIO", $options['ratio'], $produce_code);
- 
+                    $produce_code = str_replace("MEDIAID", $options['mediaid'], $produce_code);
 
 
-                }
-                /*
+                } /*
                  * Segment the values specific to the older method. Match out height and width with a preg_match, use
                  * the original constant from above, and do string replace.
                  */
@@ -121,8 +126,6 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
             }
 
 
-
-
             /*
              * Replace values used by both situations
              */
@@ -131,27 +134,20 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
             $produce_code = str_replace("DIVID", $div_ID, $produce_code);
 
 
-
-
             // If key is set, use it and append it to the whole thing for output.
             if (isset($filter->settings['soc_jwplayer_key_displayed'])) {
                 $jwkey_code = str_replace("JWKEY", trim($filter->settings['soc_jwplayer_key_displayed']), SOCJWPLAYERCODEKEY);
-                $produce_code =  trim($jwkey_code) . trim($produce_code);
+                $produce_code = trim($jwkey_code) . trim($produce_code);
             }
 
-            // include JS player
-            if (isset($filter->settings['soc_jwplayer_playerurl']) && (!is_null($filter->settings['soc_jwplayer_playerurl']))) {
-                $server_filename	= $GLOBALS['_SERVER']['DOCUMENT_ROOT'] . '/' . $filter->settings['soc_jwplayer_playerurl'];
-                $intrnt_pathname 	= $GLOBALS['_SERVER']['SERVER_NAME']  . '/' . $filter->settings['soc_jwplayer_playerurl'];
-
-                if (file_exists($server_filename)) {
-                    drupal_add_js('//' . $intrnt_pathname, array('type' => 'file', 'media' => 'all', 'preprocess' => false, 'every_page' => true));
-                } else {
-                    $msg = t("Tried to include //$intrnt_pathname but the file $server_filename does not exist. Please check your path");
-                    drupal_set_message($msg, 'error');
-                    error_log($msg);
-                }
+            // include REMOTE JS Player.
+       
+            if (isset($filter->settings['soc_jwplayer_playerurl_external']) && (strlen($filter->settings['soc_jwplayer_playerurl_external']) > 5)) {
+                drupal_add_js($filter->settings['soc_jwplayer_playerurl_external'], 'external');
+            } else {
+                drupal_add_js(DEFAULT_JWPLAYER_URL, 'external');
             }
+
 
 
 
@@ -162,7 +158,7 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
     }
 
 
-    return $text ;
+    return $text;
 
 }
 
@@ -170,11 +166,16 @@ function jwinputfilter_filterprocess($text, $filter, $format, $langcode, $cache,
  * The settings function. The only option to currently set is the JW key.
  *
  */
-function _jwinputfilter_settings($form, &$form_state, $filter, $format, $defaults) {
+function _jwinputfilter_settings($form, &$form_state, $filter, $format, $defaults)
+{
     $filter->settings += $defaults;
 
+    // default to 7.3 if nothing selected
+    if (is_null($filter->settings['soc_jwplayer_playerurl_external']) ) {
+        $filter->settings['soc_jwplayer_playerurl_external'] = DEFAULT_JWPLAYER_URL;
+    }
 
-
+    // key
     $settings['soc_jwplayer_key_displayed'] = array(
         '#type' => 'textfield',
         '#title' => t('JWPlayer Input Filter Settings'),
@@ -183,22 +184,16 @@ function _jwinputfilter_settings($form, &$form_state, $filter, $format, $default
         '#description' => t('The key to use in jwplayer.key=#### javascript embeded to page.'),
     );
 
-    $settings['soc_jwplayer_playerurl'] = array(
+    // external player
+    $settings['soc_jwplayer_playerurl_external'] = array(
         '#type' => 'textfield',
-        '#title' => t('JWPlayer URL'),
-        '#default_value' => $filter->settings['soc_jwplayer_playerurl'],
+        '#title' => t('External JS call'),
+        '#default_value' => $filter->settings['soc_jwplayer_playerurl_external'],
         '#maxlength' => 1024,
-        '#description' => t('What is the path of the player? For example, something akin to <code>/sites/default/files/page_specific_js/jwplayer/jwplayer.j</code> Do not use starting or ending slashes.'),
+        '#description' => t('Use a URL in this fashion <code>//ssl.p.jwpcdn.com/player/v/7.3.0/jwplayer.js</code>. <b>This value will override the local option.</b>'),
     );
 
-    /*$settings['soc_jwplayer_playerurl_html5'] = array(
-        '#type' => 'textfield',
-        '#title' => t('JWPlayer HTML5 URL'),
-        '#default_value' => $filter->settings['soc_jwplayer_playerurl_html5'],
-        '#maxlength' => 1024,
-        '#description' => t('What is the path of the player? For example, something akin to <code>/sites/default/files/page_specific_js/jwplayer/jwplayer.html5.js</code> Do not use starting or ending slashes.'),
-        );
-*/
+    // default thumb
     $settings['soc_jwplayer_default_thumb_url'] = array(
         '#type' => 'textfield',
         '#title' => t('Default Logo or Thumbnail'),
@@ -207,15 +202,10 @@ function _jwinputfilter_settings($form, &$form_state, $filter, $format, $default
         '#description' => t('If no thumbnail is given, use this image. For example, something akin to "<code>sites/default/files/images/Logo.png</code>"  or a full URL such as "<code>https://server.com/images/logo.png</code>". <b>It is okay</b> to use starting or ending slashes. '),
     );
 
-    /*$settings['soc_jwplayer_playerurl_flv'] = array(
-        '#type' => 'textfield',
-        '#title' => t('FLV player URL'),
-        '#default_value' => $filter->settings['soc_jwplayer_playerurl_flv'],
-        '#maxlength' => 1024,
-        '#description' => t(''),
-        );*/
-
 
 
     return $settings;
 }
+
+
+
